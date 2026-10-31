@@ -35,73 +35,71 @@ export async function createStatusImage(daysLeft) {
   const ctx = canvas.getContext('2d')
   ctx.textAlign = 'center'
 
+  // Photo stays visible at the top and fades into navy behind the text.
+  // Key content sits between y≈220 and y≈1720, clear of WhatsApp's status overlays.
   drawCover(ctx, bg)
   const shade = ctx.createLinearGradient(0, 0, 0, H)
-  shade.addColorStop(0, 'rgba(7, 26, 51, 0.80)')
-  shade.addColorStop(0.5, 'rgba(7, 26, 51, 0.88)')
+  shade.addColorStop(0, 'rgba(7, 26, 51, 0.55)')
+  shade.addColorStop(0.3, 'rgba(7, 26, 51, 0.6)')
+  shade.addColorStop(0.55, 'rgba(7, 26, 51, 0.88)')
   shade.addColorStop(1, 'rgba(7, 26, 51, 0.97)')
   ctx.fillStyle = shade
   ctx.fillRect(0, 0, W, H)
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.45)'
+  ctx.shadowBlur = 24
 
   // Logo in a white circle
   ctx.fillStyle = '#fff'
   ctx.beginPath()
-  ctx.arc(W / 2, 270, 92, 0, Math.PI * 2)
+  ctx.arc(W / 2, 330, 105, 0, Math.PI * 2)
   ctx.fill()
-  ctx.drawImage(logo, W / 2 - 86, 184, 172, 172)
+  ctx.shadowBlur = 0
+  ctx.drawImage(logo, W / 2 - 98, 232, 196, 196)
+  ctx.shadowBlur = 24
+
+  ctx.fillStyle = '#fff'
+  ctx.font = '600 32px Inter, sans-serif'
+  spaced(ctx, 'ADVENTIST UNIVERSITY OF CENTRAL AFRICA', W / 2, 510, 4)
 
   ctx.fillStyle = 'rgba(255,255,255,0.85)'
-  ctx.font = '600 30px Inter, sans-serif'
-  spaced(ctx, 'ADVENTIST UNIVERSITY OF CENTRAL AFRICA', W / 2, 440, 4)
+  ctx.font = '600 40px Inter, sans-serif'
+  spaced(ctx, 'GRADUATION CEREMONY', W / 2, 720, 12)
 
-  ctx.font = '600 34px Inter, sans-serif'
-  ctx.fillStyle = 'rgba(255,255,255,0.75)'
-  spaced(ctx, 'GRADUATION CEREMONY', W / 2, 620, 10)
-
-  ctx.font = '800 150px "Playfair Display", serif'
   ctx.fillStyle = '#fff'
-  ctx.fillText('Class of', W / 2, 790)
+  ctx.font = '800 210px "Playfair Display", serif'
+  ctx.fillText('Class of', W / 2, 935)
   // Canvas can't enable Playfair's lining figures, so numbers use Inter.
   ctx.fillStyle = GOLD
-  ctx.font = '600 128px Inter, sans-serif'
-  spaced(ctx, '2026', W / 2 + 8, 945, 16)
+  ctx.font = '600 200px Inter, sans-serif'
+  spaced(ctx, '2026', W / 2 + 10, 1140, 20)
 
-  // Days left
-  ctx.strokeStyle = 'rgba(255,255,255,0.25)'
-  ctx.lineWidth = 2
-  ctx.beginPath()
-  ctx.moveTo(240, 1060)
-  ctx.lineTo(840, 1060)
-  ctx.stroke()
+  ctx.shadowBlur = 0
+  ctx.fillStyle = GOLD
+  ctx.fillRect(W / 2 - 60, 1220, 120, 4)
 
   if (daysLeft > 0) {
     ctx.fillStyle = '#fff'
-    ctx.font = '300 300px Inter, sans-serif'
-    ctx.fillText(String(daysLeft), W / 2, 1360)
+    ctx.font = '300 340px Inter, sans-serif'
+    ctx.fillText(String(daysLeft), W / 2, 1530)
     ctx.fillStyle = GOLD
-    ctx.font = '600 44px Inter, sans-serif'
-    spaced(ctx, daysLeft === 1 ? 'DAY TO GO' : 'DAYS TO GO', W / 2, 1460, 12)
+    ctx.font = '600 50px Inter, sans-serif'
+    spaced(ctx, daysLeft === 1 ? 'DAY TO GO' : 'DAYS TO GO', W / 2 + 7, 1620, 14)
   } else {
     ctx.fillStyle = GOLD
-    ctx.font = '600 120px "Playfair Display", serif'
-    ctx.fillText('It’s today!', W / 2, 1320)
+    ctx.font = '800 150px "Playfair Display", serif'
+    ctx.fillText('It’s today!', W / 2, 1480)
   }
 
-  ctx.beginPath()
-  ctx.moveTo(240, 1540)
-  ctx.lineTo(840, 1540)
-  ctx.stroke()
-
   ctx.fillStyle = '#fff'
-  ctx.font = '600 46px Inter, sans-serif'
-  ctx.fillText('13 – 15 November 2026', W / 2, 1640)
+  ctx.font = '600 52px Inter, sans-serif'
+  ctx.fillText('13 – 15 November 2026', W / 2, 1730)
   ctx.fillStyle = 'rgba(255,255,255,0.75)'
-  ctx.font = '400 36px Inter, sans-serif'
-  ctx.fillText('Kigali, Rwanda', W / 2, 1700)
+  ctx.font = '400 40px Inter, sans-serif'
+  ctx.fillText('Kigali, Rwanda', W / 2, 1792)
 
-  ctx.fillStyle = 'rgba(255,255,255,0.6)'
+  ctx.fillStyle = 'rgba(255,255,255,0.55)'
   ctx.font = '400 30px Inter, sans-serif'
-  ctx.fillText(window.location.host, W / 2, 1820)
+  ctx.fillText(window.location.host, W / 2, 1870)
 
   return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
 }
