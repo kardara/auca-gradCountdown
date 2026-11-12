@@ -1,33 +1,23 @@
-import { useEffect, useState } from 'react'
-import { shareStatusImage } from './statusImage.js'
+import { useEffect, useRef, useState } from 'react'
+import { AnimatePresence, MotionConfig, motion } from 'motion/react'
+import Confetti, { celebrate } from './Confetti.jsx'
+import FrameMaker from './FrameMaker.jsx'
+import {
+  CELEBRATION_START,
+  COMMENCEMENT_END,
+  COMMENCEMENT_START,
+  DAYS,
+  MAP_EMBED,
+  MAP_URL,
+  MOTTO,
+  THEME,
+  currentAndNext,
+  downloadCalendar,
+  liveItemIndex,
+  todayId,
+} from './programme.js'
 
-// Kigali time (CAT, UTC+2). Change these if the official times are announced.
-const GRAD_START = new Date('2026-11-13T08:00:00+02:00')
-const GRAD_END = new Date('2026-11-15T23:59:59+02:00')
-// The progress line tracks the last 30 days before graduation.
-const STRETCH_START = new Date(GRAD_START.getTime() - 30 * 24 * 60 * 60 * 1000)
-
-const DAYS = [
-  { date: '13', weekday: 'Friday', title: 'Day One' },
-  { date: '14', weekday: 'Saturday', title: 'Day Two' },
-  { date: '15', weekday: 'Sunday', title: 'Day Three' },
-]
-
-function getTimeLeft(now) {
-  const diff = Math.max(0, GRAD_START - now)
-  return {
-    days: Math.floor(diff / 86400000),
-    hours: Math.floor((diff / 3600000) % 24),
-    minutes: Math.floor((diff / 60000) % 60),
-    seconds: Math.floor((diff / 1000) % 60),
-  }
-}
-
-function getPhase(now) {
-  if (now < GRAD_START) return 'before'
-  if (now <= GRAD_END) return 'live'
-  return 'after'
-}
+const EASE = [0.22, 1, 0.36, 1]
 
 function useNow() {
   const [now, setNow] = useState(() => new Date())
@@ -38,54 +28,19 @@ function useNow() {
   return now
 }
 
-function CapIcon() {
-  return (
-    <svg className="cap-icon" viewBox="0 0 64 48" aria-hidden="true">
-      <path d="M32 4 L60 16 L32 28 L4 16 Z" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" />
-      <path d="M16 22 v10 c0 5 7 9 16 9 s16 -4 16 -9 v-10" fill="none" stroke="currentColor" strokeWidth="2.5" />
-      <path d="M52 19.5 v14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-      <circle cx="52" cy="36" r="2.5" fill="currentColor" />
-    </svg>
-  )
-}
-
-function downloadCalendarFile() {
-  const ics = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//AUCA//Graduation Countdown//EN',
-    'BEGIN:VEVENT',
-    'UID:auca-graduation-2026@auca',
-    'DTSTAMP:20261101T000000Z',
-    'DTSTART;VALUE=DATE:20261113',
-    'DTEND;VALUE=DATE:20261116',
-    'SUMMARY:AUCA Graduation – Class of 2026',
-    'LOCATION:Adventist University of Central Africa\\, Kigali\\, Rwanda',
-    'DESCRIPTION:Celebrating the AUCA Class of 2026.',
-    'END:VEVENT',
-    'END:VCALENDAR',
-  ].join('\r\n')
-  const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }))
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'auca-graduation-2026.ics'
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
 function useShare() {
   const [copied, setCopied] = useState(false)
   const share = async () => {
     const data = {
-      title: 'AUCA Graduation – Class of 2026',
-      text: 'Counting down to the AUCA Class of 2026 graduation, 13–15 November in Kigali!',
-      url: window.location.href,
+      title: 'AUCA 32nd Graduation · Class of 2026',
+      text: 'AUCA Class of 2026 graduation, 13–15 November at Masoro Campus. See the programme and make your graduation frame:',
+      url: window.location.origin,
     }
     if (navigator.share) {
       try {
         await navigator.share(data)
       } catch {
-        // user closed the share sheet
+        // share sheet closed
       }
       return
     }
@@ -94,115 +49,404 @@ function useShare() {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      // clipboard unavailable (e.g. insecure context)
+      // clipboard unavailable
     }
   }
   return { share, copied }
 }
 
-function TimeUnit({ value, label }) {
+const pad = (n) => String(n).padStart(2, '0')
+const kigaliDate = (d) => new Date(d.getTime() + 2 * 3600000).toISOString().slice(0, 10)
+const fmtDay = (d) => d.toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'Africa/Kigali' })
+const fmtTime = (d) =>
+  d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Kigali' })
+
+// Fades and lifts content into view as it scrolls in.
+function Reveal({ children, delay = 0, className, as = 'div' }) {
+  const Tag = motion[as]
   return (
-    <div className="unit">
-      <span className="value">{String(value).padStart(2, '0')}</span>
-      <span className="label">{label}</span>
+    <Tag
+      className={className}
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.8, delay, ease: EASE }}
+    >
+      {children}
+    </Tag>
+  )
+}
+
+// Counts to the opening service first, then to Commencement.
+function countdownTarget(now) {
+  if (now < CELEBRATION_START)
+    return { at: CELEBRATION_START, label: 'Celebrations begin in', when: 'Friday 13 November · 17:00' }
+  if (now < COMMENCEMENT_START)
+    return { at: COMMENCEMENT_START, label: 'Commencement begins in', when: 'Sunday 15 November · 07:30' }
+  return null
+}
+
+function Digit({ value }) {
+  // Re-keying restarts a short CSS fade each time the number changes.
+  return (
+    <span className="value">
+      <span key={value} className="digit">
+        {value}
+      </span>
+    </span>
+  )
+}
+
+function Countdown({ now, target }) {
+  const diff = Math.max(0, target.at - now)
+  const units = [
+    [Math.floor(diff / 86400000), 'Days'],
+    [Math.floor((diff / 3600000) % 24), 'Hours'],
+    [Math.floor((diff / 60000) % 60), 'Minutes'],
+    [Math.floor((diff / 1000) % 60), 'Seconds'],
+  ]
+  return (
+    <div className="countdown">
+      <p className="countdown-label">
+        {target.label} <span>{target.when}</span>
+      </p>
+      <div className="units" role="timer">
+        {units.map(([v, l]) => (
+          <div className="unit" key={l}>
+            <Digit value={pad(v)} />
+            <span className="label">{l}</span>
+          </div>
+        ))}
+      </div>
     </div>
+  )
+}
+
+function NowNext({ now }) {
+  const { current, next } = currentAndNext(now)
+  if (!current && !next) return null
+  const s = current || next
+  return (
+    <a className="now-next" href="#programme">
+      <span className={current ? 'pulse' : 'dot'} aria-hidden="true" />
+      <span className="nn-text">
+        <span className="nn-label">{current ? 'Happening now' : 'Up next'}</span>
+        <span className="nn-title">{s.title}</span>
+        <span className="nn-meta">{current ? `Until ${s.end}` : `${fmtDay(s.startAt)} · ${fmtTime(s.startAt)}`}</span>
+      </span>
+    </a>
+  )
+}
+
+const heroItem = {
+  hidden: { opacity: 0, y: 30 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.9, ease: EASE } },
+}
+
+function Hero({ now }) {
+  const { share, copied } = useShare()
+  const target = countdownTarget(now)
+  const live = now >= COMMENCEMENT_START && now < COMMENCEMENT_END
+
+  // Big confetti burst the moment a countdown reaches zero.
+  const stage = target ? target.label : 'done'
+  const prevStage = useRef(stage)
+  useEffect(() => {
+    if (prevStage.current !== stage) celebrate(320)
+    prevStage.current = stage
+  }, [stage])
+
+  return (
+    <section className="hero" id="top">
+      <motion.div
+        className="hero-media"
+        aria-hidden="true"
+        initial={{ scale: 1.12, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 2.4, ease: EASE }}
+      />
+      <div className="container hero-inner">
+        <motion.div
+          className="hero-copy"
+          initial="hidden"
+          animate="show"
+          variants={{ show: { transition: { staggerChildren: 0.12, delayChildren: 0.2 } } }}
+        >
+          <motion.p className="eyebrow" variants={heroItem}>
+            <span className="eyebrow-rule" /> AUCA · 32nd Graduation
+          </motion.p>
+          <motion.h1 variants={heroItem}>
+            Class of <em>2026</em>
+          </motion.h1>
+          <motion.p className="lede" variants={heroItem}>
+            Three days, one celebration. <strong>13 – 15 November 2026</strong> · Masoro Campus, Kigali
+          </motion.p>
+
+          <motion.div variants={heroItem}>
+            {target ? (
+              <Countdown now={now} target={target} />
+            ) : (
+              <p className="hero-status">{live ? 'Commencement is underway.' : 'Congratulations, graduates.'}</p>
+            )}
+          </motion.div>
+
+          <motion.div className="hero-actions" variants={heroItem}>
+            <a className="btn btn-gold" href="#frame">
+              Create your photo frame
+            </a>
+            <a className="btn btn-ghost" href="#programme">
+              View the programme
+            </a>
+          </motion.div>
+          <motion.div className="text-links" variants={heroItem}>
+            <button type="button" onClick={downloadCalendar}>
+              Add to calendar
+            </button>
+            <button type="button" onClick={share}>
+              {copied ? 'Link copied ✓' : 'Share this page'}
+            </button>
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          className="hero-aside"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 1, ease: EASE }}
+        >
+          <NowNext now={now} />
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
+function SessionBlock({ day, session, now }) {
+  const live = liveItemIndex(day, session, now)
+  const timed = session.items && session.items[0].time
+  return (
+    <article className="session">
+      <header className="session-head">
+        <h4>{session.title}</h4>
+        <p className="session-meta">
+          {session.start} – {session.end}
+          {session.venue && <> · {session.venue}</>}
+        </p>
+      </header>
+
+      {session.people && (
+        <dl className="people">
+          {session.people.map(([role, who]) => (
+            <div key={role}>
+              <dt>{role}</dt>
+              <dd>{who}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+
+      {session.items && (
+        <table className="items">
+          <thead>
+            <tr>
+              <th>{timed ? 'Time' : 'No.'}</th>
+              <th>Activity</th>
+              <th>Responsible</th>
+            </tr>
+          </thead>
+          <tbody>
+            {session.items.map((it, i) => (
+              <tr key={i} className={`${i === live ? 'live' : ''} ${it.key ? 'key' : ''}`}>
+                <td className="t">{it.time || it.no}</td>
+                <td className="a">
+                  {it.key && <span className="key-mark" aria-label="Key moment" />}
+                  {it.activity}
+                  {i === live && <span className="live-tag">Now</span>}
+                </td>
+                <td className="r">{it.responsible}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </article>
+  )
+}
+
+function Programme({ now }) {
+  const [selected, setSelected] = useState(() => todayId(now))
+  const day = DAYS.find((d) => d.id === selected)
+  const today = kigaliDate(now)
+
+  return (
+    <section className="section" id="programme">
+      <div className="container">
+        <Reveal className="section-head">
+          <p className="eyebrow">
+            <span className="eyebrow-rule" /> Graduation programme
+          </p>
+          <h2>
+            Three days, <em>one celebration</em>
+          </h2>
+        </Reveal>
+
+        <Reveal delay={0.1}>
+          <div className="day-tabs" role="tablist" aria-label="Programme days">
+            {DAYS.map((d) => (
+              <button
+                key={d.id}
+                type="button"
+                role="tab"
+                aria-selected={selected === d.id}
+                className={`day-tab ${selected === d.id ? 'on' : ''} ${d.date < today ? 'past' : ''}`}
+                onClick={() => setSelected(d.id)}
+              >
+                <span className="dt-date">
+                  {d.short} {d.day} Nov
+                  {d.date === today && <i>Today</i>}
+                </span>
+                <span className="dt-title">{d.tab}</span>
+                {selected === d.id && <motion.span className="dt-bar" layoutId="dt-bar" transition={{ duration: 0.4, ease: EASE }} />}
+              </button>
+            ))}
+          </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={day.id}
+              className="day-panel"
+              role="tabpanel"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.35, ease: EASE }}
+            >
+              {day.sessions.map((s) => (
+                <SessionBlock key={s.title} day={day} session={s} now={now} />
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        </Reveal>
+      </div>
+    </section>
+  )
+}
+
+function Venue() {
+  return (
+    <section className="section venue" id="venue">
+      <div className="container venue-grid">
+        <Reveal className="venue-copy">
+          <p className="eyebrow">
+            <span className="eyebrow-rule" /> Venue
+          </p>
+          <h2>
+            AUCA <em>Masoro</em> Campus
+          </h2>
+          <p className="section-lead">Masoro Hill, Ndera, Gasabo · Kigali, Rwanda</p>
+          <dl className="facts">
+            <div>
+              <dt>Dates</dt>
+              <dd>Friday 13 – Sunday 15 November 2026</dd>
+            </div>
+            <div>
+              <dt>Attendance</dt>
+              <dd>By invitation</dd>
+            </div>
+          </dl>
+          <a className="btn btn-ghost" href={MAP_URL} target="_blank" rel="noopener noreferrer">
+            Open in Google Maps
+          </a>
+        </Reveal>
+        <Reveal delay={0.1} className="map">
+          <iframe
+            title="Map of AUCA Masoro Campus, Kigali"
+            src={MAP_EMBED}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </Reveal>
+      </div>
+    </section>
   )
 }
 
 export default function App() {
   const now = useNow()
-  const { share, copied } = useShare()
-  const [making, setMaking] = useState(false)
-  const phase = getPhase(now)
-  const t = getTimeLeft(now)
-  const progress = Math.min(
-    100,
-    Math.max(0, ((now - STRETCH_START) / (GRAD_START - STRETCH_START)) * 100)
-  )
-  const liveDay = phase === 'live' ? Math.min(3, Math.floor((now - GRAD_START) / 86400000) + 1) : 0
-  const daysToGo = Math.max(0, Math.ceil((GRAD_START - now) / 86400000))
-
-  const makeStatusImage = async () => {
-    setMaking(true)
-    try {
-      await shareStatusImage(daysToGo)
-    } finally {
-      setMaking(false)
-    }
-  }
 
   return (
-    <div className="page">
-      <div className="backdrop" aria-hidden="true" />
-      <header className="topbar">
-        <div className="brand">
-          <img src="/auca_logo.png" alt="AUCA logo" />
-          <span>Adventist University of Central Africa</span>
+    <MotionConfig reducedMotion="user">
+      <Confetti />
+      <header className="nav">
+        <div className="container nav-inner">
+          <a className="brand" href="#top">
+            <img src="/auca_logo.png" alt="" />
+            <span>
+              <b>AUCA</b>
+              <small>32nd Graduation</small>
+            </span>
+          </a>
+          <nav>
+            <a href="#venue">Venue</a>
+            <a href="#programme">Programme</a>
+            <a href="#frame" className="nav-cta">
+              Photo frame
+            </a>
+          </nav>
         </div>
-        <span className="topbar-date">13 – 15 Nov 2026</span>
       </header>
 
-      <main className="hero">
-        <CapIcon />
+      <main>
+        <Hero now={now} />
 
-        <p className="eyebrow">
-          {phase === 'before' && 'Graduation Ceremony'}
-          {phase === 'live' && `Graduation · Day ${liveDay}`}
-          {phase === 'after' && 'Congratulations, Graduates'}
-        </p>
-        <h1 className="title">
-          Class of <span className="year">2026</span>
-        </h1>
-        <p className="subtitle">
-          {phase === 'before' &&
-            'Years of hard work, one proud moment. Join us in Kigali as we celebrate every graduate.'}
-          {phase === 'live' && 'The celebration is underway. Congratulations to every graduate.'}
-          {phase === 'after' && 'Thank you for celebrating with the AUCA community.'}
-        </p>
+        <section className="theme-block" aria-label="Theme and motto">
+          <Reveal className="container theme-inner">
+            <p className="eyebrow">Graduation theme</p>
+            <blockquote>“{THEME}”</blockquote>
+            <p className="motto">
+              <span className="ornament" aria-hidden="true" />
+              Motto · {MOTTO}
+              <span className="ornament" aria-hidden="true" />
+            </p>
+          </Reveal>
+        </section>
 
-        {phase === 'before' && (
-          <>
-            <section className="countdown" aria-live="polite">
-              <TimeUnit value={t.days} label="Days" />
-              <TimeUnit value={t.hours} label="Hours" />
-              <TimeUnit value={t.minutes} label="Minutes" />
-              <TimeUnit value={t.seconds} label="Seconds" />
-            </section>
+        <Venue />
 
-            <div className="progress" aria-label={`${progress.toFixed(0)}% of the final 30 days complete`}>
-              <div className="fill" style={{ width: `${progress}%` }} />
-            </div>
-          </>
-        )}
+        <Programme now={now} />
 
-        <div className="actions">
-          {phase === 'before' && (
-            <button type="button" className="btn btn-primary" onClick={downloadCalendarFile}>
-              Add to calendar
-            </button>
-          )}
-          <button type="button" className="btn btn-ghost" onClick={share}>
-            {copied ? 'Link copied ✓' : 'Share the countdown'}
-          </button>
-          <button type="button" className="btn btn-ghost" onClick={makeStatusImage} disabled={making}>
-            {making ? 'Preparing…' : 'Post to status'}
-          </button>
-        </div>
-
-        <section className="schedule">
-          {DAYS.map((d, i) => (
-            <div key={d.date} className={`day ${liveDay === i + 1 ? 'active' : ''}`}>
-              <span className="day-num">{d.date}</span>
-              <div>
-                <p className="day-title">{d.title}</p>
-                <p className="day-meta">{d.weekday}, November</p>
-              </div>
-            </div>
-          ))}
+        <section className="section" id="frame">
+          <div className="container">
+            <Reveal className="section-head">
+              <p className="eyebrow">
+                <span className="eyebrow-rule" /> Graduation photo frame
+              </p>
+              <h2>
+                Celebrate <em>your moment</em>
+              </h2>
+              <p className="section-lead">
+                Add your photo and name to get a ready-to-post frame for your status, Instagram or LinkedIn.
+              </p>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <FrameMaker />
+            </Reveal>
+          </div>
         </section>
       </main>
 
-      <footer className="footer">Kigali, Rwanda · AUCA Graduation 2026</footer>
-    </div>
+      <footer className="footer">
+        <div className="container footer-inner">
+          <div className="footer-brand">
+            <img src="/auca_logo.png" alt="AUCA logo" />
+            <div>
+              <p>Adventist University of Central Africa</p>
+              <p className="muted">32nd Graduation · 13 – 15 November 2026 · Masoro Campus, Kigali</p>
+            </div>
+          </div>
+          <p className="footer-motto">{MOTTO}</p>
+        </div>
+      </footer>
+    </MotionConfig>
   )
 }

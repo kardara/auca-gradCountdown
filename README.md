@@ -1,10 +1,13 @@
-# AUCA Graduation Countdown · Class of 2026
+# AUCA 32nd Graduation · Class of 2026
 
-A countdown to the Adventist University of Central Africa graduation, 13–15 November 2026 in Kigali.
+Website for the Adventist University of Central Africa graduation, 13–15 November 2026 at Masoro Campus, Kigali.
 
-- Live countdown, ceremony-day and post-ceremony states
-- **Add to calendar** (.ics), **Share the countdown** (native share / copy link)
-- **Status image**: generates a 1080×1920 "X days to go" image for WhatsApp / Instagram status
+- **Celebration feel**: one navy-and-gold design, confetti on load and on frame download, and scroll reveals (via `motion`; all motion is skipped when the visitor's device asks for reduced motion)
+- **Countdown** to the opening service, then to Commencement (Sunday 15 November, 07:30), with a "happening now / up next" indicator
+- **Programme** for the three graduand days (Fri–Sun) from the official booklet; today's day opens by default and the running item is highlighted
+- **Photo frame maker**: graduates add a photo, name and (optionally) degree, then download or share a
+  branded image as a square post (1080×1080) or status/story (1080×1920). Runs fully in the browser: photos are never uploaded.
+- **Add to calendar** (.ics with every session) and **Share** (native share / copy link)
 - Link preview card (Open Graph) for WhatsApp and social media
 
 ## Run locally
@@ -14,10 +17,13 @@ npm install
 npm run dev
 ```
 
+## Editing
+
+- Programme content and times: `src/programme.js`
+- Frame design (canvas drawing): `src/frame.js`
+
 ## Deploy
 
 Import the repo on [vercel.com/new](https://vercel.com/new). Vercel detects Vite automatically
 (build: `npm run build`, output: `dist`). The link-preview URL uses the Vercel production domain;
 for a custom domain, set the `SITE_URL` environment variable (e.g. `https://grad.example.com`).
-
-The ceremony start time is set by `GRAD_START` in `src/App.jsx`.
