@@ -40,9 +40,11 @@ export default function Confetti() {
         const fromLeft = i % 2 === 0
         pieces.push({
           x: fromLeft ? -10 : w + 10,
-          y: h * (0.35 + Math.random() * 0.3),
-          vx: (fromLeft ? 1 : -1) * (4 + Math.random() * 9),
-          vy: -(8 + Math.random() * 10),
+          y: h * (0.4 + Math.random() * 0.3),
+          // Speeds scale with the screen so pieces land inside it on phones too:
+          // sideways drift ends 15–90% of the way across, peak height stays on screen.
+          vx: (fromLeft ? 1 : -1) * (0.15 + Math.random() * 0.75) * (w / 66),
+          vy: -(0.55 + Math.random() * 0.45) * Math.sqrt(0.3 * h),
           size: 6 + Math.random() * 7,
           ratio: 0.35 + Math.random() * 0.4,
           rot: Math.random() * Math.PI,
@@ -90,7 +92,7 @@ export default function Confetti() {
     const first = setTimeout(() => burst(180), 700)
     // Smaller repeat bursts (fewer on phones); skipped while the tab is hidden.
     const repeat = setInterval(() => {
-      if (!document.hidden) burst(w < 640 ? 45 : 80)
+      if (!document.hidden) burst(w < 640 ? 60 : 80)
     }, REPEAT_MS)
 
     return () => {

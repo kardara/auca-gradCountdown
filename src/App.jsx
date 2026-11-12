@@ -61,22 +61,6 @@ const fmtDay = (d) => d.toLocaleDateString('en-GB', { weekday: 'long', timeZone:
 const fmtTime = (d) =>
   d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Kigali' })
 
-// Fades and lifts content into view as it scrolls in.
-function Reveal({ children, delay = 0, className, as = 'div' }) {
-  const Tag = motion[as]
-  return (
-    <Tag
-      className={className}
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.8, delay, ease: EASE }}
-    >
-      {children}
-    </Tag>
-  )
-}
-
 // Counts to the opening service first, then to Commencement.
 function countdownTarget(now) {
   if (now < CELEBRATION_START)
@@ -173,7 +157,7 @@ function Hero({ now }) {
           variants={{ show: { transition: { staggerChildren: 0.12, delayChildren: 0.2 } } }}
         >
           <motion.p className="eyebrow" variants={heroItem}>
-            <span className="eyebrow-rule" /> AUCA · 32nd Graduation
+            AUCA · 32nd Graduation
           </motion.p>
           <motion.h1 variants={heroItem}>
             Class of <em>2026</em>
@@ -257,7 +241,9 @@ function SessionBlock({ day, session, now }) {
           <tbody>
             {session.items.map((it, i) => (
               <tr key={i} className={`${i === live ? 'live' : ''} ${it.key ? 'key' : ''}`}>
-                <td className="t">{it.time || it.no}</td>
+                <td className="t">
+                  <span>{it.time || it.no}</span>
+                </td>
                 <td className="a">
                   {it.key && <span className="key-mark" aria-label="Key moment" />}
                   {it.activity}
@@ -281,18 +267,14 @@ function Programme({ now }) {
   return (
     <section className="section" id="programme">
       <div className="container">
-        <Reveal className="section-head">
-          <p className="eyebrow">
-            <span className="eyebrow-rule" /> Graduation programme
-          </p>
-          <h2>
-            Three days, <em>one celebration</em>
-          </h2>
-        </Reveal>
+        <header className="section-head">
+          <h2>The programme</h2>
+          <p className="section-lead">Three days, one celebration. Friday 13 to Sunday 15 November.</p>
+        </header>
 
-        <Reveal delay={0.1}>
+        <div>
           <div className="day-tabs" role="tablist" aria-label="Programme days">
-            {DAYS.map((d) => (
+            {DAYS.map((d, i) => (
               <button
                 key={d.id}
                 type="button"
@@ -301,6 +283,7 @@ function Programme({ now }) {
                 className={`day-tab ${selected === d.id ? 'on' : ''} ${d.date < today ? 'past' : ''}`}
                 onClick={() => setSelected(d.id)}
               >
+                <span className="dt-num">{String(i + 1).padStart(2, '0')}</span>
                 <span className="dt-date">
                   {d.short} {d.day} Nov
                   {d.date === today && <i>Today</i>}
@@ -326,7 +309,7 @@ function Programme({ now }) {
               ))}
             </motion.div>
           </AnimatePresence>
-        </Reveal>
+        </div>
       </div>
     </section>
   )
@@ -336,13 +319,8 @@ function Venue() {
   return (
     <section className="section venue" id="venue">
       <div className="container venue-grid">
-        <Reveal className="venue-copy">
-          <p className="eyebrow">
-            <span className="eyebrow-rule" /> Venue
-          </p>
-          <h2>
-            AUCA <em>Masoro</em> Campus
-          </h2>
+        <div className="venue-copy">
+          <h2>AUCA Masoro Campus</h2>
           <p className="section-lead">Masoro Hill, Ndera, Gasabo · Kigali, Rwanda</p>
           <dl className="facts">
             <div>
@@ -357,15 +335,15 @@ function Venue() {
           <a className="btn btn-ghost" href={MAP_URL} target="_blank" rel="noopener noreferrer">
             Open in Google Maps
           </a>
-        </Reveal>
-        <Reveal delay={0.1} className="map">
+        </div>
+        <div className="map">
           <iframe
             title="Map of AUCA Masoro Campus, Kigali"
             src={MAP_EMBED}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
           />
-        </Reveal>
+        </div>
       </div>
     </section>
   )
@@ -400,7 +378,7 @@ export default function App() {
         <Hero now={now} />
 
         <section className="theme-block" aria-label="Theme and motto">
-          <Reveal className="container theme-inner">
+          <div className="container theme-inner">
             <p className="eyebrow">Graduation theme</p>
             <blockquote>“{THEME}”</blockquote>
             <p className="motto">
@@ -408,7 +386,7 @@ export default function App() {
               Motto · {MOTTO}
               <span className="ornament" aria-hidden="true" />
             </p>
-          </Reveal>
+          </div>
         </section>
 
         <Venue />
@@ -417,20 +395,13 @@ export default function App() {
 
         <section className="section" id="frame">
           <div className="container">
-            <Reveal className="section-head">
-              <p className="eyebrow">
-                <span className="eyebrow-rule" /> Graduation photo frame
-              </p>
-              <h2>
-                Celebrate <em>your moment</em>
-              </h2>
+            <header className="section-head">
+              <h2>Your graduation frame</h2>
               <p className="section-lead">
                 Add your photo and name to get a ready-to-post frame for your status, Instagram or LinkedIn.
               </p>
-            </Reveal>
-            <Reveal delay={0.1}>
-              <FrameMaker />
-            </Reveal>
+            </header>
+            <FrameMaker />
           </div>
         </section>
       </main>

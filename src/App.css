@@ -3,6 +3,7 @@
   --bg: #061a38;
   --navy: #03254f;
   --auca: #0b5cbf;
+  --panel: #0b2449;
   --surface: rgba(255, 255, 255, 0.045);
   --surface-2: rgba(255, 255, 255, 0.08);
   --line: rgba(255, 255, 255, 0.12);
@@ -12,7 +13,6 @@
   --faint: rgba(246, 243, 236, 0.62);
   --gold: #e9b632;
   --gold-light: #f6d784;
-  --gold-text: linear-gradient(100deg, #f6d784 0%, #e9b632 45%, #f8e3a6 55%, #e9b632 100%);
   --serif: 'Instrument Serif', Georgia, serif;
   --sans: 'Hanken Grotesk', system-ui, sans-serif;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -35,12 +35,7 @@ body {
   font-size: 16px;
   line-height: 1.6;
   color: var(--text);
-  background:
-    radial-gradient(1100px 600px at 90% -5%, rgba(11, 92, 191, 0.32), transparent 60%),
-    radial-gradient(900px 600px at -10% 55%, rgba(11, 92, 191, 0.16), transparent 60%),
-    radial-gradient(900px 500px at 60% 105%, rgba(233, 182, 50, 0.07), transparent 60%),
-    var(--bg);
-  background-attachment: fixed;
+  background: var(--bg);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -83,32 +78,10 @@ em {
   color: var(--gold);
 }
 
-.eyebrow-rule {
-  width: 32px;
-  height: 1px;
-  background: var(--gold);
-}
 
-/* Gold gradient lettering with a slow shimmer */
-.hero h1 em,
-.section-head h2 em {
-  background: var(--gold-text);
-  background-size: 220% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shimmer 7s ease-in-out infinite;
-  padding-right: 0.06em;
-}
-
-@keyframes shimmer {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
+.hero h1 em {
+  font-style: italic;
+  color: var(--gold);
 }
 
 .confetti {
@@ -126,19 +99,16 @@ em {
   align-items: center;
   justify-content: center;
   min-height: 52px;
-  padding: 12px 30px;
-  border-radius: 999px;
+  padding: 12px 28px;
+  border-radius: 4px;
   border: 1px solid transparent;
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   cursor: pointer;
-  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), background 0.3s, border-color 0.3s;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 
-.btn:hover {
-  transform: translateY(-2px);
-}
 
 .btn:disabled {
   opacity: 0.55;
@@ -159,19 +129,18 @@ em {
 
 .btn-gold,
 .btn-primary {
-  background: linear-gradient(135deg, #f6d784, #e9b632 60%, #d9a21f);
+  background: var(--gold);
   color: #07152e;
-  box-shadow: 0 10px 30px rgba(233, 182, 50, 0.25);
 }
 
 .btn-gold:hover,
 .btn-primary:hover {
-  box-shadow: 0 14px 40px rgba(233, 182, 50, 0.4);
+  background: var(--gold-light);
 }
 
 .btn-ghost,
 .btn-outline {
-  background: rgba(255, 255, 255, 0.04);
+  background: transparent;
   border-color: var(--line-strong);
   color: var(--text);
 }
@@ -220,9 +189,7 @@ em {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(6, 26, 56, 0.72);
-  backdrop-filter: blur(14px) saturate(1.3);
-  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  background: var(--bg);
   border-bottom: 1px solid var(--line);
 }
 
@@ -274,7 +241,7 @@ em {
 
 .nav nav a {
   padding: 8px 16px;
-  border-radius: 999px;
+  border-radius: 4px;
   color: var(--muted);
   transition: color 0.2s, background 0.2s;
 }
@@ -435,17 +402,16 @@ em {
   gap: 14px;
   width: 290px;
   padding: 18px 22px;
-  border-radius: 16px;
-  background: rgba(6, 26, 56, 0.55);
-  border: 1px solid var(--line-strong);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  transition: transform 0.3s var(--ease), border-color 0.3s;
+  border-radius: 6px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--gold);
+  transition: border-color 0.2s;
 }
 
 .now-next:hover {
-  transform: translateY(-3px);
-  border-color: var(--gold);
+  border-color: var(--line-strong);
+  border-left-color: var(--gold);
 }
 
 .nn-text {
@@ -557,12 +523,11 @@ em {
 }
 
 .section-head h2 {
-  margin-top: 16px;
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: clamp(2.6rem, 6vw, 4.2rem);
-  line-height: 1;
-  letter-spacing: -0.015em;
+  font-family: var(--sans);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  line-height: 1.05;
 }
 
 .section-lead {
@@ -632,12 +597,25 @@ em {
   color: #07152e;
 }
 
-.dt-title {
-  font-family: var(--serif);
-  font-size: clamp(1.3rem, 2.6vw, 1.85rem);
-  line-height: 1.12;
+.dt-num {
+  font-size: clamp(2.2rem, 4vw, 3rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
   color: var(--faint);
-  transition: color 0.3s;
+  transition: color 0.2s;
+}
+
+.day-tab.on .dt-num {
+  color: var(--text);
+}
+
+.dt-title {
+  font-size: clamp(1rem, 1.8vw, 1.15rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--faint);
+  transition: color 0.2s;
 }
 
 .day-tab:hover .dt-title,
@@ -667,17 +645,19 @@ em {
 }
 
 .session h4 {
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: clamp(1.9rem, 3.6vw, 2.5rem);
-  line-height: 1.1;
+  font-family: var(--sans);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1.15;
 }
 
 .session-meta {
+  padding: 6px 14px;
+  background: var(--auca);
+  color: #fff;
   font-size: 0.9rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--gold);
   font-variant-numeric: tabular-nums;
 }
 
@@ -727,10 +707,24 @@ em {
 }
 
 .items .t {
-  width: 92px;
-  font-weight: 700;
-  color: var(--gold);
+  width: 96px;
   font-variant-numeric: tabular-nums;
+}
+
+.items .t span {
+  display: inline-block;
+  min-width: 56px;
+  padding: 2px 8px;
+  background: var(--auca);
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+}
+
+.items tr.key .t span,
+.items tr.live .t span {
+  background: var(--gold);
+  color: #07152e;
 }
 
 .items .a {
@@ -792,23 +786,13 @@ em {
 }
 
 .venue h2 {
-  margin-top: 16px;
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: clamp(2.6rem, 6vw, 4.2rem);
-  line-height: 1;
-  letter-spacing: -0.015em;
+  font-family: var(--sans);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  line-height: 1.05;
 }
 
-.venue h2 em {
-  background: var(--gold-text);
-  background-size: 220% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shimmer 7s ease-in-out infinite;
-  padding-right: 0.06em;
-}
 
 .facts {
   margin: 28px 0 32px;
@@ -834,11 +818,10 @@ em {
 
 .map {
   overflow: hidden;
-  border-radius: 20px;
+  border-radius: 6px;
   border: 1px solid var(--line-strong);
   aspect-ratio: 4 / 3;
-  background: var(--surface);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  background: var(--panel);
 }
 
 /* Google's light map, tinted to sit in the navy page */
@@ -857,9 +840,9 @@ em {
   gap: 52px;
   align-items: start;
   padding: 40px;
-  background: var(--surface);
+  background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 24px;
+  border-radius: 8px;
 }
 
 .fm-controls {
@@ -875,7 +858,7 @@ em {
   padding: 18px;
   background: rgba(255, 255, 255, 0.03);
   border: 1.5px dashed var(--line-strong);
-  border-radius: 14px;
+  border-radius: 6px;
   transition: border-color 0.2s, background 0.2s;
 }
 
@@ -950,7 +933,7 @@ em {
   color: var(--text);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--line-strong);
-  border-radius: 12px;
+  border-radius: 6px;
   transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
@@ -988,7 +971,7 @@ em {
   text-align: left;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--line-strong);
-  border-radius: 12px;
+  border-radius: 6px;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
 }
@@ -1069,7 +1052,6 @@ em {
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--text);
-  backdrop-filter: blur(6px);
 }
 
 .fm-preview.story .sample-tag {
