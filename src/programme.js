@@ -8,7 +8,6 @@ export const THEME = 'Grounded in Integrity, Shaping the Future with Excellence'
 export const VENUE = 'AUCA Masoro Campus'
 export const MAP_QUERY = 'Adventist University of Central Africa, Masoro, Kigali, Rwanda'
 export const MAP_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(MAP_QUERY)}`
-export const MAP_EMBED = `https://www.google.com/maps?q=${encodeURIComponent(MAP_QUERY)}&z=15&output=embed`
 
 // The main event the countdown targets.
 export const COMMENCEMENT_START = at('2026-11-15', '07:30')

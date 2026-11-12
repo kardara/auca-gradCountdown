@@ -264,9 +264,6 @@ em {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  min-height: calc(100svh - 68px);
-  display: flex;
-  align-items: flex-end;
 }
 
 .hero-media {
@@ -280,12 +277,8 @@ em {
 }
 
 .hero-inner {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
-  gap: 40px;
-  padding-top: 110px;
-  padding-bottom: 80px;
+  padding-top: 96px;
+  padding-bottom: 72px;
 }
 
 .hero-copy {
@@ -398,14 +391,18 @@ em {
 
 .now-next {
   display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  width: 290px;
-  padding: 18px 22px;
-  border-radius: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  width: 100%;
+  margin-bottom: 36px;
+  padding: 16px 20px;
+  text-align: left;
   background: var(--panel);
   border: 1px solid var(--line);
   border-left: 3px solid var(--gold);
+  border-radius: 4px;
+  cursor: pointer;
   transition: border-color 0.2s;
 }
 
@@ -414,9 +411,8 @@ em {
   border-left-color: var(--gold);
 }
 
-.nn-text {
-  display: flex;
-  flex-direction: column;
+.now-next.is-live {
+  border-left-color: #3ddc84;
 }
 
 .nn-label {
@@ -428,15 +424,13 @@ em {
 }
 
 .nn-title {
-  margin-top: 4px;
-  font-family: var(--serif);
-  font-size: 1.55rem;
-  line-height: 1.12;
+  font-weight: 700;
+  font-size: 1.05rem;
 }
 
 .nn-meta {
-  margin-top: 4px;
-  font-size: 0.88rem;
+  margin-left: auto;
+  font-size: 0.92rem;
   color: var(--muted);
 }
 
@@ -445,7 +439,6 @@ em {
   flex: none;
   width: 9px;
   height: 9px;
-  margin-top: 5px;
   border-radius: 50%;
   background: var(--gold);
   animation: pulse 2s infinite;
@@ -467,49 +460,34 @@ em {
 
 /* ---------- Theme ---------- */
 .theme-block {
-  padding: 40px 0 24px;
+  padding: 0;
 }
 
 .theme-inner {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding-top: 64px;
-  padding-bottom: 64px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 40px;
+  padding-top: 22px;
+  padding-bottom: 22px;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-}
-
-.theme-inner blockquote {
-  max-width: 900px;
-  margin-top: 20px;
+  text-align: center;
   font-family: var(--serif);
   font-style: italic;
-  font-size: clamp(2rem, 4.6vw, 3.5rem);
-  line-height: 1.12;
+  font-size: clamp(1.15rem, 2vw, 1.35rem);
 }
 
-.motto {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 26px;
-  font-size: 0.78rem;
+.tb-label {
+  margin-right: 8px;
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--muted);
-}
-
-.ornament {
-  width: 40px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold));
-}
-
-.ornament:last-child {
-  background: linear-gradient(90deg, var(--gold), transparent);
+  color: var(--gold);
+  vertical-align: 2px;
 }
 
 /* ---------- Sections ---------- */
@@ -774,63 +752,29 @@ em {
 }
 
 /* ---------- Venue ---------- */
-.venue {
-  padding-top: 72px;
+.venue-strip {
+  padding-bottom: 88px;
 }
 
-.venue-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 56px;
+.venue-inner {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-}
-
-.venue h2 {
-  font-family: var(--sans);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  font-size: clamp(2.2rem, 5vw, 3.4rem);
-  line-height: 1.05;
-}
-
-
-.facts {
-  margin: 28px 0 32px;
+  justify-content: space-between;
+  gap: 20px 32px;
+  padding-top: 32px;
   border-top: 1px solid var(--line);
 }
 
-.facts > div {
-  display: grid;
-  grid-template-columns: 130px 1fr;
-  gap: 16px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--line);
+.venue-inner h3 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
-.facts dt {
-  font-size: 0.9rem;
-  color: var(--faint);
-}
-
-.facts dd {
-  font-weight: 600;
-}
-
-.map {
-  overflow: hidden;
-  border-radius: 6px;
-  border: 1px solid var(--line-strong);
-  aspect-ratio: 4 / 3;
-  background: var(--panel);
-}
-
-/* Google's light map, tinted to sit in the navy page */
-.map iframe {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border: 0;
-  filter: invert(0.9) hue-rotate(185deg) saturate(0.7) brightness(0.95);
+.venue-inner p {
+  margin-top: 4px;
+  color: var(--muted);
 }
 
 /* ---------- Frame maker ---------- */
@@ -1054,11 +998,6 @@ em {
   color: var(--text);
 }
 
-.fm-preview.story .sample-tag {
-  left: 50%;
-  transform: translateX(-50%);
-}
-
 .fm-preview {
   position: sticky;
   top: 92px;
@@ -1068,15 +1007,11 @@ em {
 
 .fm-preview canvas {
   width: 100%;
+  max-width: 500px;
   height: auto;
-  border-radius: 6px;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08);
   touch-action: none;
-}
-
-.fm-preview.story canvas {
-  width: auto;
-  max-height: min(78vh, 760px);
 }
 
 .fm-preview canvas.draggable {
@@ -1132,39 +1067,24 @@ em {
 
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
-  .hero {
-    min-height: auto;
-  }
   .hero-media {
     background:
       linear-gradient(180deg, rgba(6, 26, 56, 0.2) 0%, rgba(6, 26, 56, 0.55) 30%, rgba(6, 26, 56, 0.92) 55%, var(--bg) 75%),
       url('/graduation-bg.jpg') 60% 0 / auto 62% no-repeat;
   }
   .hero-inner {
-    grid-template-columns: 1fr;
-    gap: 28px;
-    padding-top: 240px;
+    padding-top: 220px;
     padding-bottom: 56px;
-  }
-  .now-next {
-    width: 100%;
   }
   .frame-maker {
     grid-template-columns: 1fr;
     gap: 28px;
     padding: 20px;
   }
-  .venue-grid {
-    grid-template-columns: 1fr;
-    gap: 32px;
-  }
   .fm-preview {
     position: relative;
     top: 0;
     order: -1;
-  }
-  .fm-preview.story canvas {
-    max-height: 70vh;
   }
 }
 
@@ -1186,15 +1106,9 @@ em {
     display: block;
     margin: 4px 0 0;
   }
-  .theme-inner {
-    padding-top: 48px;
-    padding-bottom: 48px;
-  }
-  .motto {
-    letter-spacing: 0.16em;
-  }
-  .ornament {
-    display: none;
+  .nn-meta {
+    margin-left: 0;
+    width: 100%;
   }
   .section {
     padding: 72px 0;
@@ -1245,9 +1159,6 @@ em {
   .items .r {
     grid-column: 2;
     font-size: 0.9rem;
-  }
-  .facts > div {
-    grid-template-columns: 100px 1fr;
   }
   .items tr.live {
     background: rgba(233, 182, 50, 0.1);

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { celebrate } from './Confetti.jsx'
-import { FORMATS, THEMES, drawFrame, exportFrame, loadFrameFonts, loadImage, photoRect } from './frame.js'
+import { PHOTO, THEMES, drawFrame, exportFrame, loadFrameFonts, loadImage } from './frame.js'
 
 const START_POS = { zoom: 1, x: 0, y: 0 }
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
@@ -14,7 +14,6 @@ export default function FrameMaker() {
   const [sample, setSample] = useState(null)
   const [name, setName] = useState('')
   const [degree, setDegree] = useState('')
-  const [format, setFormat] = useState('square')
   const [theme, setTheme] = useState('light')
   const [pos, setPos] = useState(START_POS)
   const [fontsReady, setFontsReady] = useState(false)
@@ -32,7 +31,6 @@ export default function FrameMaker() {
     if (!canvasRef.current) return
     const id = requestAnimationFrame(() =>
       drawFrame(canvasRef.current, {
-        format,
         theme,
         logo,
         // Until a photo is added, show a sample so people see what they'll get.
@@ -43,7 +41,7 @@ export default function FrameMaker() {
       })
     )
     return () => cancelAnimationFrame(id)
-  }, [format, theme, img, sample, logo, name, degree, pos, fontsReady])
+  }, [theme, img, sample, logo, name, degree, pos, fontsReady])
 
   const openFile = async (file) => {
     if (!file) return
@@ -75,7 +73,7 @@ export default function FrameMaker() {
     const dx = (e.clientX - drag.current.x) * ratio
     const dy = (e.clientY - drag.current.y) * ratio
     drag.current = { x: e.clientX, y: e.clientY }
-    const rect = photoRect(format)
+    const rect = PHOTO
     setPos((p) => {
       const s = Math.max(rect.w / img.width, rect.h / img.height) * p.zoom
       const maxX = (img.width * s - rect.w) / 2
@@ -167,25 +165,6 @@ export default function FrameMaker() {
         </label>
 
         <fieldset className="field">
-          <span>Format</span>
-          <div className="segmented" role="radiogroup">
-            {Object.entries(FORMATS).map(([key, f]) => (
-              <button
-                key={key}
-                type="button"
-                role="radio"
-                aria-checked={format === key}
-                className={format === key ? 'on' : ''}
-                onClick={() => setFormat(key)}
-              >
-                <strong>{f.label}</strong>
-                <small>{f.hint}</small>
-              </button>
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset className="field">
           <span>Style</span>
           <div className="segmented swatches" role="radiogroup">
             {Object.entries(THEMES).map(([key, t]) => (
@@ -235,7 +214,7 @@ export default function FrameMaker() {
         </p>
       </div>
 
-      <div className={`fm-preview ${format}`}>
+      <div className="fm-preview">
         {!img && <span className="sample-tag">Sample preview</span>}
         <canvas
           ref={canvasRef}

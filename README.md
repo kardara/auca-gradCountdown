@@ -6,7 +6,8 @@ Website for the Adventist University of Central Africa graduation, 13–15 Novem
 - **Countdown** to the opening service, then to Commencement (Sunday 15 November, 07:30), with a "happening now / up next" indicator
 - **Programme** for the three graduand days (Fri–Sun) from the official booklet; today's day opens by default and the running item is highlighted
 - **Photo frame maker**: graduates add a photo, name and (optionally) degree, then download or share a
-  branded image as a square post (1080×1080) or status/story (1080×1920). Runs fully in the browser: photos are never uploaded.
+  branded 4:5 portrait image (1080×1350) for WhatsApp status, Instagram, Facebook or LinkedIn, in white or navy.
+  Runs fully in the browser: photos are never uploaded.
 - **Add to calendar** (.ics with every session) and **Share** (native share / copy link)
 - Link preview card (Open Graph) for WhatsApp and social media
 

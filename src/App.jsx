@@ -7,7 +7,6 @@ import {
   COMMENCEMENT_END,
   COMMENCEMENT_START,
   DAYS,
-  MAP_EMBED,
   MAP_URL,
   MOTTO,
   THEME,
@@ -106,19 +105,17 @@ function Countdown({ now, target }) {
   )
 }
 
-function NowNext({ now }) {
+function NowNext({ now, onSelect }) {
   const { current, next } = currentAndNext(now)
   if (!current && !next) return null
   const s = current || next
   return (
-    <a className="now-next" href="#programme">
+    <button type="button" className={`now-next ${current ? 'is-live' : ''}`} onClick={() => onSelect(s.dayId)}>
       <span className={current ? 'pulse' : 'dot'} aria-hidden="true" />
-      <span className="nn-text">
-        <span className="nn-label">{current ? 'Happening now' : 'Up next'}</span>
-        <span className="nn-title">{s.title}</span>
-        <span className="nn-meta">{current ? `Until ${s.end}` : `${fmtDay(s.startAt)} · ${fmtTime(s.startAt)}`}</span>
-      </span>
-    </a>
+      <span className="nn-label">{current ? 'Happening now' : 'Up next'}</span>
+      <span className="nn-title">{s.title}</span>
+      <span className="nn-meta">{current ? `until ${s.end}` : `${fmtDay(s.startAt)} · ${fmtTime(s.startAt)}`}</span>
+    </button>
   )
 }
 
@@ -190,15 +187,6 @@ function Hero({ now }) {
               {copied ? 'Link copied ✓' : 'Share this page'}
             </button>
           </motion.div>
-        </motion.div>
-
-        <motion.div
-          className="hero-aside"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 1, ease: EASE }}
-        >
-          <NowNext now={now} />
         </motion.div>
       </div>
     </section>
@@ -272,6 +260,8 @@ function Programme({ now }) {
           <p className="section-lead">Three days, one celebration. Friday 13 to Sunday 15 November.</p>
         </header>
 
+        <NowNext now={now} onSelect={setSelected} />
+
         <div>
           <div className="day-tabs" role="tablist" aria-label="Programme days">
             {DAYS.map((d, i) => (
@@ -317,33 +307,15 @@ function Programme({ now }) {
 
 function Venue() {
   return (
-    <section className="section venue" id="venue">
-      <div className="container venue-grid">
-        <div className="venue-copy">
-          <h2>AUCA Masoro Campus</h2>
-          <p className="section-lead">Masoro Hill, Ndera, Gasabo · Kigali, Rwanda</p>
-          <dl className="facts">
-            <div>
-              <dt>Dates</dt>
-              <dd>Friday 13 – Sunday 15 November 2026</dd>
-            </div>
-            <div>
-              <dt>Attendance</dt>
-              <dd>By invitation</dd>
-            </div>
-          </dl>
-          <a className="btn btn-ghost" href={MAP_URL} target="_blank" rel="noopener noreferrer">
-            Open in Google Maps
-          </a>
+    <section className="venue-strip" id="venue">
+      <div className="container venue-inner">
+        <div>
+          <h3>AUCA Masoro Campus</h3>
+          <p>Masoro Hill, Ndera, Gasabo · Kigali, Rwanda · Attendance by invitation</p>
         </div>
-        <div className="map">
-          <iframe
-            title="Map of AUCA Masoro Campus, Kigali"
-            src={MAP_EMBED}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
-        </div>
+        <a className="btn btn-ghost" href={MAP_URL} target="_blank" rel="noopener noreferrer">
+          Open in Google Maps
+        </a>
       </div>
     </section>
   )
@@ -365,7 +337,6 @@ export default function App() {
             </span>
           </a>
           <nav>
-            <a href="#venue">Venue</a>
             <a href="#programme">Programme</a>
             <a href="#frame" className="nav-cta">
               Photo frame
@@ -379,17 +350,14 @@ export default function App() {
 
         <section className="theme-block" aria-label="Theme and motto">
           <div className="container theme-inner">
-            <p className="eyebrow">Graduation theme</p>
-            <blockquote>“{THEME}”</blockquote>
-            <p className="motto">
-              <span className="ornament" aria-hidden="true" />
-              Motto · {MOTTO}
-              <span className="ornament" aria-hidden="true" />
+            <p>
+              <span className="tb-label">Theme</span> “{THEME}”
+            </p>
+            <p>
+              <span className="tb-label">Motto</span> {MOTTO}
             </p>
           </div>
         </section>
-
-        <Venue />
 
         <Programme now={now} />
 
@@ -398,12 +366,15 @@ export default function App() {
             <header className="section-head">
               <h2>Your graduation frame</h2>
               <p className="section-lead">
-                Add your photo and name to get a ready-to-post frame for your status, Instagram or LinkedIn.
+                Add your photo and name to get a portrait frame (1080 × 1350) that fits your WhatsApp status,
+                Instagram, Facebook and LinkedIn.
               </p>
             </header>
             <FrameMaker />
           </div>
         </section>
+
+        <Venue />
       </main>
 
       <footer className="footer">
