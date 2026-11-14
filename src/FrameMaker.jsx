@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { celebrate } from './Confetti.jsx'
+import { MAJORS } from './majors.js'
 import { PHOTO, THEMES, drawFrame, exportFrame, loadFrameFonts, loadImage } from './frame.js'
 
 const START_POS = { zoom: 1, x: 0, y: 0 }
@@ -37,7 +38,7 @@ export default function FrameMaker() {
         img: img || sample,
         pos: img ? pos : START_POS,
         name: name.trim() || 'Your Name',
-        degree: degree.trim() || (img ? '' : 'Your degree or programme'),
+        degree: degree.trim() || (img ? '' : 'Your degree and major'),
       })
     )
     return () => cancelAnimationFrame(id)
@@ -146,22 +147,27 @@ export default function FrameMaker() {
             type="text"
             value={name}
             maxLength={40}
-            placeholder="e.g. Aline Uwase"
+            placeholder="e.g. Abdoulaye Zakaria Djerou"
             onChange={(e) => setName(e.target.value)}
           />
         </label>
 
         <label className="field">
           <span>
-            Degree or programme <em>optional</em>
+            Degree and major <em>optional</em>
           </span>
-          <input
-            type="text"
-            value={degree}
-            maxLength={60}
-            placeholder="e.g. BSc in Information Technology"
-            onChange={(e) => setDegree(e.target.value)}
-          />
+          <select value={degree} onChange={(e) => setDegree(e.target.value)} className={degree ? '' : 'empty'}>
+            <option value="">Select your degree and major</option>
+            {MAJORS.map((g) => (
+              <optgroup key={g.degree} label={g.degree}>
+                {g.options.map((o) => (
+                  <option key={o.label} value={o.label}>
+                    {o.major || g.degree}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
         </label>
 
         <fieldset className="field">
