@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-// Confetti on a fixed canvas: a big burst on load, then a burst every couple of
+// Confetti on a fixed canvas: a big burst on load, then a burst every few
 // seconds for a continuous celebration. Fire an extra one with celebrate().
 const COLORS = ['#e9b632', '#f6d784', '#ffffff', '#3d8bf0', '#0b5cbf']
 const REPEAT_MS = 5000
@@ -16,7 +16,9 @@ export default function Confetti() {
   const ref = useRef(null)
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    // Many phones turn this on with battery saver. Keep the one-off celebration
+    // bursts there, but skip the repeating ones.
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const canvas = ref.current
     const ctx = canvas.getContext('2d')
     const dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -91,9 +93,11 @@ export default function Confetti() {
     window.addEventListener('celebrate', onCelebrate)
     const first = setTimeout(() => burst(180), 700)
     // Smaller repeat bursts (fewer on phones); skipped while the tab is hidden.
-    const repeat = setInterval(() => {
-      if (!document.hidden) burst(w < 640 ? 60 : 80)
-    }, REPEAT_MS)
+    const repeat = reduced
+      ? 0
+      : setInterval(() => {
+          if (!document.hidden) burst(w < 640 ? 60 : 80)
+        }, REPEAT_MS)
 
     return () => {
       clearTimeout(first)

@@ -605,7 +605,7 @@ em {
 /* ---------- Programme ---------- */
 .day-tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   border-bottom: 1px solid var(--line);
 }
 
@@ -878,6 +878,7 @@ em {
 }
 
 .fm-controls {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 22px;
@@ -959,6 +960,8 @@ em {
 }
 
 .field input[type='text'] {
+  width: 100%;
+  min-width: 0;
   height: 52px;
   padding: 0 18px;
   font: inherit;
@@ -970,6 +973,8 @@ em {
 }
 
 .field select {
+  width: 100%;
+  min-width: 0;
   height: 52px;
   padding: 0 44px 0 18px;
   font: inherit;
@@ -1200,7 +1205,7 @@ em {
     padding-bottom: 56px;
   }
   .frame-maker {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 28px;
     padding: 20px;
   }
@@ -1310,6 +1315,46 @@ em {
   .footer-inner {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 400px) {
+  .hero h1 {
+    font-size: 3.4rem;
+  }
+  .hero h1.long {
+    font-size: 3rem;
+  }
+  .dt-num {
+    font-size: 1.9rem;
+  }
+  .dt-title {
+    font-size: 0.8rem;
+    letter-spacing: -0.01em;
+  }
+  .day-tab {
+    padding-right: 6px;
+  }
+  .day-tab + .day-tab {
+    padding-left: 8px;
+  }
+  .day-tab + .day-tab .dt-bar {
+    left: 8px;
+  }
+  .dt-date {
+    font-size: 0.66rem;
+  }
+  .frame-maker {
+    padding: 14px;
+  }
+  .dropzone {
+    flex-wrap: wrap;
+  }
+  .unit {
+    padding-left: 10px;
+  }
+  .value {
+    font-size: 2.5rem;
   }
 }
 
