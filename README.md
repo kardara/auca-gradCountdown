@@ -11,6 +11,16 @@ Website for the Adventist University of Central Africa graduation, 13–15 Novem
 - **Add to calendar** (.ics with every session) and **Share** (native share / copy link)
 - Link preview card (Open Graph) for WhatsApp and social media
 
+## Graduation day
+
+The page changes by itself on Sunday 15 November (Kigali time):
+
+- **From 00:00**: "Today, we graduate", countdown to 07:30, Watch live and YouTube buttons
+- **07:30–13:00**: Commencement is live; a banner and a big confetti burst mark the Conferment of Degrees (10:25–11:25)
+- **From 13:00**: "Congratulations, graduates", and frames read "GRADUATED · CLASS OF 2026"
+
+Preview any moment by adding `?at=` to the URL, e.g. `?at=2026-11-15T10:30`.
+
 ## Run locally
 
 ```bash

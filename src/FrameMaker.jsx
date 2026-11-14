@@ -6,7 +6,7 @@ import { PHOTO, THEMES, drawFrame, exportFrame, loadFrameFonts, loadImage } from
 const START_POS = { zoom: 1, x: 0, y: 0 }
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
 
-export default function FrameMaker() {
+export default function FrameMaker({ graduated = false }) {
   const canvasRef = useRef(null)
   const fileRef = useRef(null)
   const drag = useRef(null)
@@ -15,6 +15,7 @@ export default function FrameMaker() {
   const [sample, setSample] = useState(null)
   const [name, setName] = useState('')
   const [degree, setDegree] = useState('')
+  const [honours, setHonours] = useState('')
   const [theme, setTheme] = useState('light')
   const [pos, setPos] = useState(START_POS)
   const [fontsReady, setFontsReady] = useState(false)
@@ -39,10 +40,12 @@ export default function FrameMaker() {
         pos: img ? pos : START_POS,
         name: name.trim() || 'Your Name',
         degree: degree.trim() || (img ? '' : 'Your degree and major'),
+        honours,
+        graduated,
       })
     )
     return () => cancelAnimationFrame(id)
-  }, [theme, img, sample, logo, name, degree, pos, fontsReady])
+  }, [theme, honours, graduated, img, sample, logo, name, degree, pos, fontsReady])
 
   const openFile = async (file) => {
     if (!file) return
@@ -167,6 +170,17 @@ export default function FrameMaker() {
                 ))}
               </optgroup>
             ))}
+          </select>
+        </label>
+
+        <label className="field">
+          <span>
+            Honours <em>optional</em>
+          </span>
+          <select value={honours} onChange={(e) => setHonours(e.target.value)} className={honours ? '' : 'empty'}>
+            <option value="">None</option>
+            <option value="Grand Distinction">Grand Distinction</option>
+            <option value="Distinction">Distinction</option>
           </select>
         </label>
 

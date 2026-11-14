@@ -13,6 +13,15 @@ export const MAP_URL = `https://www.google.com/maps/search/?api=1&query=${encode
 export const COMMENCEMENT_START = at('2026-11-15', '07:30')
 export const COMMENCEMENT_END = at('2026-11-15', '13:00')
 export const CELEBRATION_START = at('2026-11-13', '17:00')
+export const GRADUATION_DAY = at('2026-11-15', '00:00')
+// Conferment of Degrees: the big moment of Commencement
+export const CONFERMENT_START = at('2026-11-15', '10:25')
+export const CONFERMENT_END = at('2026-11-15', '11:25')
+
+// AUCA Rwanda on YouTube: /live opens whatever the channel is streaming now
+export const CHANNEL_URL = 'https://www.youtube.com/@aucarwanda3405'
+export const LIVE_URL = `${CHANNEL_URL}/live`
+export const REPLAYS_URL = `${CHANNEL_URL}/streams`
 export const WEEK_START = at('2026-11-13', '00:00')
 export const WEEK_END = at('2026-11-15', '23:59')
 

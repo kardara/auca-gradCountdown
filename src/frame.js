@@ -143,6 +143,31 @@ function drawSeal(ctx, logo, cx, cy, size, theme) {
   if (logo) ctx.drawImage(logo, cx - size / 2, cy - size / 2, size, size)
 }
 
+// Gold honours ribbon in the photo's top-left corner (Grand Distinction / Distinction).
+function drawHonours(ctx, text) {
+  const size = 26
+  ctx.save()
+  ctx.font = `800 ${size}px ${SANS}`
+  ctx.letterSpacing = `${size * 0.16}px`
+  const label = text.toUpperCase()
+  const w = ctx.measureText(label).width + 44
+  const h = 58
+  const x = PHOTO.x + 28
+  const y = PHOTO.y + 28
+  ctx.shadowColor = 'rgba(0,0,0,0.3)'
+  ctx.shadowBlur = 16
+  ctx.shadowOffsetY = 4
+  ctx.fillStyle = GOLD
+  roundRect(ctx, x, y, w, h, 4)
+  ctx.fill()
+  ctx.shadowColor = 'transparent'
+  ctx.fillStyle = '#03254f'
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(label, x + 22, y + h / 2 + 1)
+  ctx.restore()
+}
+
 // Thin brand band along the bottom edge: AUCA blue with a gold end.
 function drawBand(ctx) {
   const h = 12
@@ -152,7 +177,7 @@ function drawBand(ctx) {
   ctx.fillRect(W * 0.78, H - h, W * 0.22, h)
 }
 
-export function drawFrame(canvas, { img, logo, name, degree, pos, theme: themeKey }) {
+export function drawFrame(canvas, { img, logo, name, degree, honours, graduated, pos, theme: themeKey }) {
   const theme = THEMES[themeKey] || THEMES.light
   if (canvas.width !== W) canvas.width = W
   if (canvas.height !== H) canvas.height = H
@@ -161,6 +186,7 @@ export function drawFrame(canvas, { img, logo, name, degree, pos, theme: themeKe
   ctx.fillStyle = theme.bg
   ctx.fillRect(0, 0, W, H)
   drawPhoto(ctx, img, pos, theme)
+  if (honours) drawHonours(ctx, honours)
 
   // Text block on the left; AUCA seal on the right behind a hairline.
   const left = PHOTO.x
@@ -177,7 +203,7 @@ export function drawFrame(canvas, { img, logo, name, degree, pos, theme: themeKe
   const blockH = 22 + 20 + size * 0.8 + lineH * (lines.length - 1) + degreeGap + 44 + 18
   let y = bandTop + (bandBottom - bandTop - blockH) / 2 + 22
 
-  caps(ctx, 'CLASS OF 2026', left, y, 28, theme.eyebrow)
+  caps(ctx, graduated ? 'GRADUATED · CLASS OF 2026' : 'CLASS OF 2026', left, y, 28, theme.eyebrow)
   y += 20 + size * 0.8
   ctx.font = `400 ${size}px ${SERIF}`
   ctx.fillStyle = theme.name

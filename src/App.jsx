@@ -4,11 +4,17 @@ import Confetti, { celebrate } from './Confetti.jsx'
 import FrameMaker from './FrameMaker.jsx'
 import {
   CELEBRATION_START,
+  CHANNEL_URL,
   COMMENCEMENT_END,
   COMMENCEMENT_START,
+  CONFERMENT_END,
+  CONFERMENT_START,
   DAYS,
+  GRADUATION_DAY,
+  LIVE_URL,
   MAP_URL,
   MOTTO,
+  REPLAYS_URL,
   THEME,
   currentAndNext,
   downloadCalendar,
@@ -18,13 +24,76 @@ import {
 
 const EASE = [0.22, 1, 0.36, 1]
 
+// ?at=2026-11-15T10:30 previews the page as it will look at that Kigali time.
+const PREVIEW_OFFSET = (() => {
+  try {
+    const at = new URLSearchParams(window.location.search).get('at')
+    const t = at && new Date(`${at.length === 16 ? `${at}:00` : at}+02:00`)
+    return t && !Number.isNaN(t.getTime()) ? t.getTime() - Date.now() : 0
+  } catch {
+    return 0
+  }
+})()
+
 function useNow() {
-  const [now, setNow] = useState(() => new Date())
+  const [now, setNow] = useState(() => new Date(Date.now() + PREVIEW_OFFSET))
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000)
+    const id = setInterval(() => setNow(new Date(Date.now() + PREVIEW_OFFSET)), 1000)
     return () => clearInterval(id)
   }, [])
   return now
+}
+
+// Where we are in the weekend, from the hero's point of view.
+function heroPhase(now) {
+  if (now >= COMMENCEMENT_END) return 'graduated'
+  if (now >= COMMENCEMENT_START) return 'live'
+  if (now >= GRADUATION_DAY) return 'today'
+  return 'countdown'
+}
+
+function YouTubeIcon() {
+  return (
+    <svg viewBox="0 0 28 20" aria-hidden="true">
+      <rect width="28" height="20" rx="5" fill="#ff0033" />
+      <path d="M11 5.5v9l8-4.5z" fill="#fff" />
+    </svg>
+  )
+}
+
+function ConfermentBanner({ now }) {
+  const on = now >= CONFERMENT_START && now < CONFERMENT_END
+  const [closed, setClosed] = useState(false)
+  const was = useRef(on)
+  useEffect(() => {
+    if (on) celebrate(was.current ? 260 : 420)
+    was.current = on
+  }, [on])
+  return (
+    <AnimatePresence>
+      {on && !closed && (
+        <motion.div
+          className="conferment"
+          role="status"
+          initial={{ y: -40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -40, opacity: 0 }}
+          transition={{ duration: 0.6, ease: EASE }}
+        >
+          <span className="pulse" aria-hidden="true" />
+          <span>
+            <b>Degrees are being conferred.</b> Congratulations, Class of 2026!
+          </span>
+          <a href={LIVE_URL} target="_blank" rel="noopener noreferrer">
+            Watch live
+          </a>
+          <button type="button" className="conferment-close" aria-label="Close" onClick={() => setClosed(true)}>
+            ×
+          </button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
 }
 
 function useShare() {
@@ -124,10 +193,70 @@ const heroItem = {
   show: { opacity: 1, y: 0, transition: { duration: 0.9, ease: EASE } },
 }
 
+const HERO_COPY = {
+  countdown: {
+    eyebrow: 'AUCA · 32nd Graduation',
+    title: (
+      <>
+        Class of <em>2026</em>
+      </>
+    ),
+    lede: (
+      <>
+        Three days, one celebration. <strong>13 – 15 November 2026</strong> · Masoro Campus, Kigali
+      </>
+    ),
+  },
+  today: {
+    eyebrow: 'Sunday 15 November · Graduation day',
+    title: (
+      <>
+        Today, we <em>graduate</em>
+      </>
+    ),
+    lede: (
+      <>
+        Commencement starts at <strong>07:30</strong> at Masoro Campus. Family and friends can follow it live on
+        YouTube.
+      </>
+    ),
+  },
+  live: {
+    eyebrow: 'Sunday 15 November · Graduation day',
+    title: (
+      <>
+        Today, we <em>graduate</em>
+      </>
+    ),
+    lede: (
+      <>
+        <strong>Commencement is live now</strong> from Masoro Campus. Follow the programme below as it happens.
+      </>
+    ),
+  },
+  graduated: {
+    eyebrow: 'AUCA · 32nd Graduation',
+    title: (
+      <>
+        Congratulations, <em>graduates</em>
+      </>
+    ),
+    lede: (
+      <>
+        The Class of 2026 has officially graduated. Make your graduation frame and share the moment.
+      </>
+    ),
+  },
+}
+
 function Hero({ now }) {
   const { share, copied } = useShare()
+  const phase = heroPhase(now)
   const target = countdownTarget(now)
-  const live = now >= COMMENCEMENT_START && now < COMMENCEMENT_END
+  const copy = HERO_COPY[phase]
+  // Any session streaming right now (Friday and Saturday services too)
+  const sessionLive = !!currentAndNext(now).current
+  const showLive = phase === 'today' || phase === 'live' || sessionLive
 
   // Big confetti burst the moment a countdown reaches zero.
   const stage = target ? target.label : 'done'
@@ -136,6 +265,12 @@ function Hero({ now }) {
     if (prevStage.current !== stage) celebrate(320)
     prevStage.current = stage
   }, [stage])
+
+  const youtube = (
+    <a className="btn btn-youtube" href={CHANNEL_URL} target="_blank" rel="noopener noreferrer">
+      <YouTubeIcon /> YouTube
+    </a>
+  )
 
   return (
     <section className="hero" id="top">
@@ -154,35 +289,61 @@ function Hero({ now }) {
           variants={{ show: { transition: { staggerChildren: 0.12, delayChildren: 0.2 } } }}
         >
           <motion.p className="eyebrow" variants={heroItem}>
-            AUCA · 32nd Graduation
+            {(phase === 'live' || sessionLive) && <span className="live-pill">Live</span>}
+            {copy.eyebrow}
           </motion.p>
-          <motion.h1 variants={heroItem}>
-            Class of <em>2026</em>
+          <motion.h1 variants={heroItem} className={phase === 'countdown' ? '' : 'long'}>
+            {copy.title}
           </motion.h1>
           <motion.p className="lede" variants={heroItem}>
-            Three days, one celebration. <strong>13 – 15 November 2026</strong> · Masoro Campus, Kigali
+            {copy.lede}
           </motion.p>
 
-          <motion.div variants={heroItem}>
-            {target ? (
+          {target && (
+            <motion.div variants={heroItem}>
               <Countdown now={now} target={target} />
-            ) : (
-              <p className="hero-status">{live ? 'Commencement is underway.' : 'Congratulations, graduates.'}</p>
-            )}
-          </motion.div>
+            </motion.div>
+          )}
 
           <motion.div className="hero-actions" variants={heroItem}>
-            <a className="btn btn-gold" href="#frame">
-              Create your photo frame
-            </a>
-            <a className="btn btn-ghost" href="#programme">
-              View the programme
-            </a>
+            {showLive ? (
+              <>
+                <a className="btn btn-gold" href={LIVE_URL} target="_blank" rel="noopener noreferrer">
+                  <span className="rec" aria-hidden="true" /> Watch live
+                </a>
+                {youtube}
+                <a className="btn btn-ghost" href="#frame">
+                  Create your photo frame
+                </a>
+              </>
+            ) : phase === 'graduated' ? (
+              <>
+                <a className="btn btn-gold" href="#frame">
+                  Create your graduation frame
+                </a>
+                <a className="btn btn-ghost" href={REPLAYS_URL} target="_blank" rel="noopener noreferrer">
+                  Watch the replay
+                </a>
+                {youtube}
+              </>
+            ) : (
+              <>
+                <a className="btn btn-gold" href="#frame">
+                  Create your photo frame
+                </a>
+                <a className="btn btn-ghost" href="#programme">
+                  View the programme
+                </a>
+                {youtube}
+              </>
+            )}
           </motion.div>
           <motion.div className="text-links" variants={heroItem}>
-            <button type="button" onClick={downloadCalendar}>
-              Add to calendar
-            </button>
+            {phase === 'countdown' && (
+              <button type="button" onClick={downloadCalendar}>
+                Add to calendar
+              </button>
+            )}
             <button type="button" onClick={share}>
               {copied ? 'Link copied ✓' : 'Share this page'}
             </button>
@@ -327,6 +488,7 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <Confetti />
+      <ConfermentBanner now={now} />
       <header className="nav">
         <div className="container nav-inner">
           <a className="brand" href="#top">
@@ -370,7 +532,7 @@ export default function App() {
                 Instagram, Facebook and LinkedIn.
               </p>
             </header>
-            <FrameMaker />
+            <FrameMaker graduated={now >= COMMENCEMENT_END} />
           </div>
         </section>
 
